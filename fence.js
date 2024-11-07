@@ -5,22 +5,31 @@ const { Solver, Int, And, Or, Distinct } = new Context("main");
 
 const solver = new Solver();
 
-const x = Int.const('x');  // x is a Z3 integer
-const y = Int.const('y')
+// if there were previous problems
+solver.reset();
 
-solver.add(And(x < 10, x.ge(8)));  // x <= 10, x >=9
+var x = Int.const('x');  // x is a Z3 integer
+var y = Int.const('y')
 
-// Run Z3 solver, find solution and sat/unsat
+solver.add(And(x.gt(5), x.lt(10), y.gt(15), y.lt(25)));
 
 if (await solver.check() === "sat") {
-
-    // Extract value for x
     let model = solver.model();
-    let xVal = parseInt(model.eval(x).toString());
-    console.log(`sat. A valid value for x is: ${xVal}`);
-
+    console.log("A spot within the fence is: ",  model.eval(x).toString(), ",", model.eval(y).toString())
 } else {
-
     console.log("unsat. Could not find a valid value for x.");
+}
 
+solver.reset();
+
+x = Int.const('x');  // x is a Z3 integer
+y = Int.const('y')
+
+solver.add(And(Or(x.lt(5), x.gt(10)), Or(y.lt(15), y.gt(25))));
+
+if (await solver.check() === "sat") {
+    let model = solver.model();
+    console.log("A spot within the fence is: ",  model.eval(x).toString(), ",", model.eval(y).toString())
+} else {
+    console.log("unsat. Could not find a valid value for x.");
 }
